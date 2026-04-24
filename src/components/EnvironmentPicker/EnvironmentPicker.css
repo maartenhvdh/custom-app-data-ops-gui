@@ -1,0 +1,41 @@
+.env-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 220px;
+  flex: 1;
+}
+
+.env-picker__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #555;
+}
+
+.env-picker__select {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background: #fff;
+  cursor: pointer;
+  appearance: auto;
+  color: #1a1a1a;
+  transition: border-color 0.15s;
+}
+
+.env-picker__select:hover {
+  border-color: #4a90e2;
+}
+
+.env-picker__select:focus {
+  outline: 2px solid #4a90e2;
+  outline-offset: 1px;
+  border-color: #4a90e2;
+}
+
+.env-picker__select option:disabled {
+  color: #aaa;
+}

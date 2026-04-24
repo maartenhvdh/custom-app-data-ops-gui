@@ -5,6 +5,6 @@ import { defineConfig } from "vite";
 export default defineConfig({
   plugins: [react(), basicSsl()],
   server: {
-    https: true,
+    // basicSsl plugin injects HTTPS; the server block keeps the port predictable
   },
 });

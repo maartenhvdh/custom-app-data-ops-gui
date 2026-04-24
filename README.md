@@ -1,129 +1,172 @@
-# Kontent.ai Custom App Starter
+# Data Ops Custom App for Kontent.ai
 
-A React + TypeScript starter template for building [Kontent.ai custom apps](https://kontent.ai/learn/docs/build-apps/custom-apps/overview). This template provides a quick setup with all the essentials to start developing your custom app.
+A Kontent.ai custom app that embeds the [Data Ops](https://github.com/kontent-ai/data-ops) tooling directly inside the Kontent.ai environment. Admins and editors can **diff** and **sync** content between environments using environment dropdowns — no manual entry of environment IDs or API keys.
 
+---
 
-## Getting Started
+## Prerequisites
 
-### Installation
+- Node.js 20+
+- pnpm 9+
+- A Kontent.ai subscription with at least two environments
+- A Management API key for each environment you want to expose
+
+---
+
+## Installation
 
 ```bash
-pnpm i
+pnpm install
 ```
 
-### Development
-
-Start the development server:
+## Local Development
 
 ```bash
 pnpm dev
 ```
 
-The app will be available at `https://localhost:5173`. The dev server uses a self-signed certificate for HTTPS, which is required for custom apps. Your browser will show a security warning on first access - this is expected for local development.
+The app runs at `https://localhost:5173`. The dev server uses a self-signed certificate — accept the browser warning on first load. HTTPS is required by the Kontent.ai custom app SDK.
 
-### Build
-
-Build for production:
+## Build & Preview
 
 ```bash
-pnpm build
+pnpm build      # outputs to dist/
+pnpm preview    # serve the built output locally
 ```
 
-Preview the production build:
+---
 
-```bash
-pnpm preview
-```
+## Configuring appConfig
 
-## Examples
+All environment configuration is stored in the Kontent.ai admin UI — **nothing is hardcoded in the app**.
 
-### Observing Context Changes
+Go to: **Environment Settings → Custom Apps → [your app] → Configuration**
 
-The `useAppContext` hook automatically subscribes to context changes:
+Paste the following JSON and fill in your real values:
 
-```typescript
-import { useAppContext } from './contexts/AppContext';
-
-const context = useAppContext();
-```
-
-### Accessing App Configuration
-
-The `useAppConfig` hook returns the parsed app configuration:
-
-```typescript
-import { useAppConfig } from './contexts/AppContext';
-
-const config = useAppConfig();
-```
-
-### Single Context Fetch
-
-While the SDK provides `getCustomAppContext()` for fetching the context once without subscribing to changes, **we recommend using the reactive `useCustomAppContext` hook instead**. The hook ensures your app stays up-to-date with the latest context automatically.
-
-If you need a single fetch for specific use cases:
-
-```typescript
-import { getCustomAppContext } from '@kontent-ai/custom-app-sdk';
-
-const response = await getCustomAppContext();
-if (!response.isError) {
-  console.log(response.context);
+```json
+{
+  "environments": [
+    {
+      "id": "prod",
+      "name": "Production",
+      "environmentId": "<kontent-environment-guid>",
+      "managementApiKey": "<management-api-key>"
+    },
+    {
+      "id": "staging",
+      "name": "Staging",
+      "environmentId": "<kontent-environment-guid>",
+      "managementApiKey": "<management-api-key>"
+    },
+    {
+      "id": "dev",
+      "name": "Development",
+      "environmentId": "<kontent-environment-guid>",
+      "managementApiKey": "<management-api-key>"
+    }
+  ]
 }
 ```
 
-### Restricting Supported Contexts
+Each object in `environments` requires:
 
-By default, the app supports all page contexts (Item Editor, Content Inventory, and Other). To restrict your app to specific contexts, edit the `createAppContext` call in [`src/contexts/AppContext.tsx`](./src/contexts/AppContext.tsx):
+| Field | Description |
+|---|---|
+| `id` | Short unique slug (used internally, e.g. `"prod"`) |
+| `name` | Human-readable label shown in the dropdown |
+| `environmentId` | The Kontent.ai environment GUID |
+| `managementApiKey` | Management API key for that environment |
 
-```typescript
-// Only allow Item Editor context
-export const { AppContextProvider, useAppContext, useAppConfig } = createAppContext([
-  "itemEditor",
-] as const);
+**Security notes:**
+- `managementApiKey` values are delivered to the app through the SDK's postMessage channel and are never placed in the page HTML, URLs, or rendered to the screen.
+- The app reads keys only to set `Authorization: Bearer` headers on Management API calls.
+- Each key only needs the permissions required for the operations you want to allow (read on source, read+write on target).
+- Rotate keys in appConfig any time you rotate them in Kontent.ai.
 
-// Allow Item Editor and Content Inventory
-export const { AppContextProvider, useAppContext, useAppConfig } = createAppContext([
-  "itemEditor",
-  "contentInventory",
-] as const);
+If `appConfig` is missing or malformed the app shows a clear error page directing you to fix the configuration — the app never crashes silently.
+
+---
+
+## Registering the App in Kontent.ai
+
+1. Build and deploy the `dist/` folder (Netlify, Vercel, or any static host).
+2. In Kontent.ai go to **Environment Settings → Custom Apps → Add custom app**.
+3. Set the **Source URL** to your deployed app URL.
+4. Paste the appConfig JSON (above) into the **Configuration** field.
+5. Choose where the app should appear — **dialog mode** via the top navigation bar is recommended so it has enough screen space.
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/kontent-ai/custom-app-data-ops-gui)
+
+---
+
+## Project Structure
+
+```
+src/
+├── contexts/
+│   ├── AppContext.tsx           Kontent.ai SDK context observer (do not modify)
+│   └── DataOpsContext.tsx       Selected source/target environment state
+├── components/
+│   ├── EnvironmentPicker/       Dropdown populated from appConfig.environments
+│   │   ├── EnvironmentPicker.tsx
+│   │   └── EnvironmentPicker.css
+│   ├── DataOpsApp/              Main integration shell + operation panels
+│   │   ├── DataOpsApp.tsx       Tab shell (Diff / Sync)
+│   │   ├── DiffPanel.tsx        Environment diff view
+│   │   ├── SyncPanel.tsx        Environment sync view
+│   │   └── DataOpsApp.css       All panel styles
+│   └── InvalidConfig.tsx        Error page shown when appConfig is missing
+├── hooks/
+│   └── useValidatedConfig.ts    Validates and type-narrows appConfig
+└── types/
+    └── appConfig.ts             TypeScript types + runtime guard for appConfig
 ```
 
-When a restricted context is configured:
-- If the app is opened in an unsupported context, a friendly error page is displayed
-- TypeScript narrows the return type of `useAppContext()` based on the allowed contexts
+---
 
-For example, with `["itemEditor"]`, the `useAppContext()` hook returns `CustomAppItemEditorContext` with guaranteed access to `contentItemId` and `validationErrors` properties.
+## Integrating data-ops-gui Components
 
-### Adjusting Popup Size
+`SyncPanel.tsx` and `DiffPanel.tsx` contain integration points marked with `// ── Integration point ──` comments. To wire in the full [data-ops-gui](https://github.com/kontent-ai/data-ops-gui) components:
 
-Control the size of your custom app when displayed in a popup:
+1. Copy the relevant panel source files from data-ops-gui into `src/data-ops-gui/`.
+2. Find every `<input>` that captures `environmentId` or `apiKey` in local state.
+3. Delete those inputs and their `useState` declarations.
+4. Accept an `EnvironmentConfig` prop instead and read `environmentId` / `managementApiKey` from it.
+5. Import and render the adapted component inside `SyncPanel` or `DiffPanel`, passing `sourceEnv` / `targetEnv` as props.
 
-```typescript
-import { setPopupSize } from '@kontent-ai/custom-app-sdk';
+### Adding a New Operation Tab
 
-await setPopupSize(
-  { unit: 'px', value: 800 },  // width
-  { unit: 'px', value: 600 }   // height
-);
-```
+1. Create `src/components/DataOpsApp/MyOperationPanel.tsx` accepting `{ sourceEnv: EnvironmentConfig; targetEnv: EnvironmentConfig }`.
+2. Add `"myOperation"` to the `ActiveTab` union in `DataOpsApp.tsx`.
+3. Add the tab button and conditional render in the tabs section.
 
-## Deploying Your Custom App
+---
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/kontent-ai/custom-app-starter-react.git)
+## Hooks Reference
 
-1. Build the app: `pnpm build`
-2. Deploy the `dist` folder to your hosting provider (Netlify, Vercel, etc.)
-3. Configure the custom app in Kontent.ai:
-   - Go to Environment settings > Custom apps
-   - Add a new custom app with your deployed URL
-   - Configure the URL pattern where the app should appear
-   - Optionally, change the app to the dialog mode
+### `useValidatedConfig()`
+
+Returns either `{ isValid: true, config: DataOpsAppConfig }` or `{ isValid: false, error: string }`. Always call this at the top of any component that needs the environment list.
+
+### `useDataOpsContext()`
+
+Returns `{ sourceEnv, targetEnv, setSourceEnv, setTargetEnv }`. Available anywhere inside `DataOpsContextProvider` (wraps `DataOpsInner` inside `DataOpsApp`).
+
+### `useAppConfig()`
+
+Returns the raw `appConfig` object from the Kontent.ai SDK context. Prefer `useValidatedConfig()` over this in application code.
+
+---
 
 ## Learn More
 
 - [Kontent.ai Custom Apps Documentation](https://kontent.ai/learn/docs/build-apps/custom-apps/overview)
 - [Kontent.ai Custom App SDK](https://github.com/kontent-ai/custom-app-sdk-js)
+- [Kontent.ai Data Ops](https://github.com/kontent-ai/data-ops)
+- [Kontent.ai Data Ops GUI](https://github.com/kontent-ai/data-ops-gui)
+
+---
 
 ## License
 
