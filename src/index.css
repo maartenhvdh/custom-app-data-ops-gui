@@ -1,11 +1,4 @@
 :root {
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
-    "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color: #213547;
-  background-color: #ffffff;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -18,11 +11,185 @@
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
+html, body {
+  font-family: sans-serif;
   min-height: 100vh;
 }
 
+body {
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  /* Wavy purple gradient background matching data-ops-gui aesthetic */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900'%3E%3Crect width='1440' height='900' fill='%23faf9ff'/%3E%3Cpath d='M0 0 Q360 80 720 50 Q1080 20 1440 70 L1440 0 Z' fill='%235b4ff5' fill-opacity='0.13'/%3E%3Cpath d='M0 0 Q360 130 720 90 Q1080 50 1440 110 L1440 0 Z' fill='%235b4ff5' fill-opacity='0.07'/%3E%3Cpath d='M0 900 Q360 820 720 850 Q1080 880 1440 830 L1440 900 Z' fill='%235b4ff5' fill-opacity='0.1'/%3E%3Cpath d='M0 900 Q360 860 720 875 Q1080 890 1440 865 L1440 900 Z' fill='%235b4ff5' fill-opacity='0.06'/%3E%3Ccircle cx='80' cy='80' r='280' fill='%235b4ff5' fill-opacity='0.05'/%3E%3Ccircle cx='1380' cy='820' r='320' fill='%235b4ff5' fill-opacity='0.04'/%3E%3C/svg%3E");
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
 #root {
-  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* ── Card container (matches data-ops-gui .content) ─────────────────────────── */
+.content {
+  padding: 2em;
+  width: 80%;
+  min-width: 760px;
+  max-width: 1100px;
+  background-color: white;
+  border-radius: 20px;
+  box-shadow: 0 0 35px rgba(11, 30, 171, 0.22);
+  min-height: 550px;
+  position: relative;
+  font-size: 1rem;
+  margin: auto;
+}
+
+/* ── Header / title ──────────────────────────────────────────────────────────── */
+.title {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: 2em;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--midnight-blue, #022049);
+}
+
+.logo img {
+  height: 3em;
+  border-radius: 50%;
+}
+
+/* ── Menu ────────────────────────────────────────────────────────────────────── */
+.menu {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.menu-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 180px;
+}
+
+.tooltip {
+  color: var(--dark-grey, #525252);
+  font-size: 0.85rem;
+  max-width: 280px;
+  line-height: 1.4;
+}
+
+/* ── Environment picker (styled with stylekit tokens) ────────────────────────── */
+.env-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 240px;
+}
+
+.env-picker__label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--dark-grey, #525252);
+}
+
+/* ── Step navigation ─────────────────────────────────────────────────────────── */
+.step-navigation {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* ── Form spacing helpers ────────────────────────────────────────────────────── */
+.spaced-5 {
+  margin-bottom: 1.25rem;
+}
+
+.not-displayed {
+  color: var(--dark-grey, #525252);
+  font-size: 0.95rem;
+}
+
+/* ── InvalidConfig fallback ──────────────────────────────────────────────────── */
+.invalid-config {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 0 35px rgba(11, 30, 171, 0.22);
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.invalid-config__icon {
+  font-size: 2.5rem;
+  color: #f39c12;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.invalid-config__title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--red, #db0000);
+  margin: 0 0 0.75rem;
+}
+
+.invalid-config__message {
+  max-width: 500px;
+  color: #444;
+  line-height: 1.5;
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+}
+
+.invalid-config__hint {
+  color: #888;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .content {
+    width: 95%;
+    min-width: unset;
+  }
+
+  .step-navigation {
+    position: static;
+    margin-top: 2rem;
+    justify-content: flex-end;
+  }
+}
+
+@media (min-width: 1921px) {
+  .content {
+    font-size: 1.2rem;
+    padding: 3em;
+  }
+
+  .title {
+    font-size: 2.5em;
+  }
 }

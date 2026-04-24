@@ -30,7 +30,7 @@ export const EnvironmentPicker = ({
       </label>
       <select
         id={pickerId}
-        className="env-picker__select"
+        className="select"
         value={selectedId ?? ""}
         onChange={handleChange}
       >

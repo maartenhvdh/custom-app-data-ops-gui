@@ -15,8 +15,14 @@
   },
   "dependencies": {
     "@kontent-ai/custom-app-sdk": "^2.1.1",
+    "@kontent-ai/data-ops": "^2.6.1",
+    "@kontent-ai/stylekit": "^1.0.0",
+    "@netlify/functions": "^5.2.0",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "react-dom": "^19.2.3",
+    "react-router-dom": "^7.14.2",
+    "zod": "^4.3.6",
+    "zod-validation-error": "^5.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.11",
