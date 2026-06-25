@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(Remove-Item -Recurse -Force \"c:\\\\projects\\\\custom-app-data-ops-gui\\\\netlify\" -Confirm:$false)"
+      "PowerShell(Remove-Item -Recurse -Force \"c:\\\\projects\\\\custom-app-data-ops-gui\\\\netlify\" -Confirm:$false)",
+      "Bash(gh api *)",
+      "PowerShell(gh api repos/kontent-ai/data-ops-gui/contents/src/utils/sync.ts?ref=main --jq '.content' | ForEach-Object { [System.Text.Encoding]::UTF8.GetString\\([System.Convert]::FromBase64String\\($_ -replace '\\\\s',''\\)\\) })",
+      "PowerShell(gh api repos/kontent-ai/data-ops-gui/contents/src/components/sync/SyncDiff.tsx?ref=main --jq '.content' | ForEach-Object { [System.Text.Encoding]::UTF8.GetString\\([System.Convert]::FromBase64String\\($_ -replace '\\\\s',''\\)\\) })",
+      "PowerShell(gh api repos/kontent-ai/data-ops-gui/contents/src/components/sync/SyncEntities.tsx?ref=main --jq '.content' | ForEach-Object { [System.Text.Encoding]::UTF8.GetString\\([System.Convert]::FromBase64String\\($_ -replace '\\\\s',''\\)\\) })"
     ]
   }
 }

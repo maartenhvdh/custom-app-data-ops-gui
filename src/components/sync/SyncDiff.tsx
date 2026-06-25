@@ -27,13 +27,15 @@ export const SyncDiff = () => {
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (
-        event.data &&
-        typeof event.data === "object" &&
-        event.data.type === "setHeight" &&
-        typeof event.data.height === "number"
-      ) {
+      if (!event.data || typeof event.data !== "object") return;
+
+      if (event.data.type === "setHeight" && typeof event.data.height === "number") {
         setIframeHeight(event.data.height);
+      }
+
+      if (event.data.type === "scrollToOffset" && typeof event.data.offset === "number") {
+        const iframeTop = iframeRef.current?.getBoundingClientRect().top ?? 0;
+        window.scrollTo({ top: window.scrollY + iframeTop + event.data.offset, behavior: "smooth" });
       }
     };
     window.addEventListener("message", handleMessage);

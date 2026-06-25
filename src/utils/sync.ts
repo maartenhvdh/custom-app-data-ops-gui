@@ -13,6 +13,9 @@ export const injectIframeResizeScript = (htmlString: string): string => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlString, "text/html");
 
+  const base = doc.createElement("base");
+  base.target = "_blank";
+
   const script = doc.createElement("script");
   script.type = "text/javascript";
   script.text = `
@@ -26,15 +29,23 @@ export const injectIframeResizeScript = (htmlString: string): string => {
       observer.observe(document.body);
       window.addEventListener('unload', () => observer.disconnect());
 
-      document.querySelectorAll('a').forEach(a => {
-        const href = a.getAttribute('href');
-        if (!href || !href.startsWith('#')) {
-          a.target = '_blank';
+      document.addEventListener('click', function(e) {
+        var link = e.target;
+        while (link && link.tagName !== 'A') link = link.parentElement;
+        if (!link) return;
+        var href = link.getAttribute('href');
+        if (href && href.charAt(0) === '#') {
+          e.preventDefault();
+          var el = document.getElementById(href.substring(1));
+          if (el) {
+            window.parent.postMessage({ type: 'scrollToOffset', offset: el.offsetTop }, '*');
+          }
         }
-      });
+      }, true);
     })();
   `;
 
   doc.body.appendChild(script);
+  doc.head.appendChild(base);
   return doc.documentElement.outerHTML;
 };
