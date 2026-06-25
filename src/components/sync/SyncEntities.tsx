@@ -40,7 +40,7 @@ export const SyncEntities = () => {
     setError(undefined);
 
     try {
-      const response = await fetch("/.netlify/functions/diff", {
+      const response = await fetch("/api/diff", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

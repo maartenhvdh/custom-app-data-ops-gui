@@ -1,5 +1,5 @@
 import { syncDiff } from "@kontent-ai/data-ops";
-import type { Handler } from "@netlify/functions";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { z } from "zod";
 import { fromError } from "zod-validation-error/v4";
 
@@ -23,19 +23,19 @@ const schema = z.object({
   entities: z.array(z.enum(entityNames)).optional(),
 });
 
-export const handler: Handler = async (event) => {
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== "POST") {
+    return res.status(405).send("Method Not Allowed");
   }
 
-  const contentType = event.headers["content-type"] ?? event.headers["Content-Type"] ?? "";
+  const contentType = req.headers["content-type"] ?? "";
   if (!contentType.includes("application/json")) {
-    return { statusCode: 400, body: "Content-Type must be application/json" };
+    return res.status(400).send("Content-Type must be application/json");
   }
 
-  const parseResult = schema.safeParse(JSON.parse(event.body ?? "{}"));
+  const parseResult = schema.safeParse(req.body);
   if (!parseResult.success) {
-    return { statusCode: 400, body: fromError(parseResult.error).message };
+    return res.status(400).send(fromError(parseResult.error).message);
   }
 
   const { sourceEnvironmentId, sourceApiKey, targetEnvironmentId, targetApiKey, entities } =
@@ -50,15 +50,8 @@ export const handler: Handler = async (event) => {
       entities,
     });
 
-    return {
-      statusCode: 200,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ html }),
-    };
+    return res.status(200).json({ html });
   } catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify(err, Object.getOwnPropertyNames(err)),
-    };
+    return res.status(500).send(JSON.stringify(err, Object.getOwnPropertyNames(err)));
   }
-};
+}

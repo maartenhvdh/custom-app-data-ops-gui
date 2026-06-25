@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Remove-Item -Recurse -Force \"c:\\\\projects\\\\custom-app-data-ops-gui\\\\netlify\" -Confirm:$false)"
+    ]
+  }
+}

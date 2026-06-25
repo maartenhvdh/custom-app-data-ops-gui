@@ -46,7 +46,7 @@ export const SyncDiff = () => {
     setError(undefined);
 
     try {
-      const response = await fetch("/.netlify/functions/sync", {
+      const response = await fetch("/api/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
