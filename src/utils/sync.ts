@@ -28,6 +28,17 @@ export const injectIframeResizeScript = (htmlString: string): string => {
       const observer = new ResizeObserver(sendHeight);
       observer.observe(document.body);
       window.addEventListener('unload', () => observer.disconnect());
+
+      document.addEventListener('click', (e) => {
+        const anchor = e.target.closest('a');
+        if (!anchor) return;
+        const href = anchor.getAttribute('href');
+        if (href && href.startsWith('#')) {
+          e.preventDefault();
+          const target = document.querySelector(href);
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
     })();
   `;
 
