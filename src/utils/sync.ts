@@ -13,9 +13,6 @@ export const injectIframeResizeScript = (htmlString: string): string => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlString, "text/html");
 
-  const base = doc.createElement("base");
-  base.target = "_blank";
-
   const script = doc.createElement("script");
   script.type = "text/javascript";
   script.text = `
@@ -29,20 +26,15 @@ export const injectIframeResizeScript = (htmlString: string): string => {
       observer.observe(document.body);
       window.addEventListener('unload', () => observer.disconnect());
 
-      document.addEventListener('click', (e) => {
-        const anchor = e.target.closest('a');
-        if (!anchor) return;
-        const href = anchor.getAttribute('href');
-        if (href && href.startsWith('#')) {
-          e.preventDefault();
-          const target = document.querySelector(href);
-          if (target) target.scrollIntoView({ behavior: 'smooth' });
+      document.querySelectorAll('a').forEach(a => {
+        const href = a.getAttribute('href');
+        if (!href || !href.startsWith('#')) {
+          a.target = '_blank';
         }
       });
     })();
   `;
 
   doc.body.appendChild(script);
-  doc.head.appendChild(base);
   return doc.documentElement.outerHTML;
 };
