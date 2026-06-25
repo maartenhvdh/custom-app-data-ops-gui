@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useWizardContext } from "../../contexts/WizardContext.tsx";
 import { Loader } from "../Loader.tsx";
@@ -18,29 +18,10 @@ export const SyncDiff = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState(false);
-  const [iframeHeight, setIframeHeight] = useState(500);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   const diffResult = (location.state as { diffResult?: string } | null)?.diffResult;
-
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (!event.data || typeof event.data !== "object") return;
-
-      if (event.data.type === "setHeight" && typeof event.data.height === "number") {
-        setIframeHeight(event.data.height);
-      }
-
-      if (event.data.type === "scrollToOffset" && typeof event.data.offset === "number") {
-        const iframeTop = iframeRef.current?.getBoundingClientRect().top ?? 0;
-        window.scrollTo({ top: window.scrollY + iframeTop + event.data.offset, behavior: "smooth" });
-      }
-    };
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, []);
 
   const runSync = async () => {
     setShowConfirm(false);
@@ -109,11 +90,10 @@ export const SyncDiff = () => {
       {diffResult
         ? (
           <iframe
-            ref={iframeRef}
             srcDoc={diffResult}
             title="Diff result"
             sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
-            style={{ width: "100%", border: "none", height: iframeHeight }}
+            style={{ width: "100%", border: "none", height: "75vh" }}
           />
         )
         : (

@@ -20,15 +20,6 @@ export const injectIframeResizeScript = (htmlString: string): string => {
   script.type = "text/javascript";
   script.text = `
     (() => {
-      const sendHeight = () => {
-        const height = document.documentElement.scrollHeight;
-        window.parent.postMessage({ type: 'setHeight', height: height + 5 }, '*');
-      };
-      window.addEventListener('load', sendHeight);
-      const observer = new ResizeObserver(sendHeight);
-      observer.observe(document.body);
-      window.addEventListener('unload', () => observer.disconnect());
-
       document.addEventListener('click', function(e) {
         var link = e.target;
         while (link && link.tagName !== 'A') link = link.parentElement;
@@ -36,10 +27,14 @@ export const injectIframeResizeScript = (htmlString: string): string => {
         var href = link.getAttribute('href');
         if (href && href.charAt(0) === '#') {
           e.preventDefault();
-          var el = document.getElementById(href.substring(1));
+          var id = href.substring(1);
+          var el = document.getElementById(id);
           if (el) {
-            window.parent.postMessage({ type: 'scrollToOffset', offset: el.offsetTop }, '*');
+            el.scrollIntoView({ behavior: 'smooth' });
           }
+          document.querySelectorAll('.sidebar a').forEach(function(a) {
+            a.classList.toggle('active', a.getAttribute('href') === href);
+          });
         }
       }, true);
     })();
